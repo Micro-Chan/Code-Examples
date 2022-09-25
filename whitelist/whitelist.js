@@ -9,7 +9,6 @@ const client = new MongoClient(url);
 
 
 const server = http.createServer((req, res) => {
-    let result = "ai9efj"
     try{
         const { headers } = req;
         let data = '';
@@ -19,6 +18,7 @@ const server = http.createServer((req, res) => {
         
         req.on('end', () => {
             async function run() {
+                let result = "waiegjd213f"
                 //parse json
                 data = JSON.parse(data) 
 
@@ -35,7 +35,7 @@ const server = http.createServer((req, res) => {
 
                 //timechecking
                 let timematch = false
-                if ((time - data.ostime) < 3) {
+                if ((time - data.ostime) < 6) {
                     timematch = true
                 }
                 
@@ -56,12 +56,12 @@ const server = http.createServer((req, res) => {
                 const collection = database.collection("whitelisted")
                 const query = { duid: key };
                 const options = {
-                  projection: { _id: 0, duid: 0, hwid: 1, IPs: 0, lastchange: 1 },
+                  projection: { hwid: 1, lastchange: 1 },
                 };
                 const entry = await collection.findOne(query, options);
                 let hwidallow = true
                 if (entry.hwid != sui) {
-                    if ((time - Number(lastchange)) > 86400) {
+                    if ((time - Number(entry.lastchange)) > 86400) {
                         collection.updateOne(
                             { duid: key },
                             { $set: { hwid: sui, lastchange: time} }
@@ -69,8 +69,10 @@ const server = http.createServer((req, res) => {
                     } else {  hwidallow = false  }
                 }
 
+
+
                 //returning
-                if (timematch && found == 1 && size == 3 && hwidallow) {
+                if (timematch && size == 3 && hwidallow) {
                     collection.updateOne(
                         { duid: key },
                         { $push: { IPs: data.haship } }
@@ -83,16 +85,17 @@ const server = http.createServer((req, res) => {
                     result = "hwidgay"
                 }
 
-
+                console.log(result)
                 console.log("---------------------------")
+                res.end(result)
             }
-        run.catch(console.dir)
+        run().catch(console.dir)
         })  
     } catch (err) {
         console.log(err.stack)
     } 
     finally {
-        res.end(result)
+
     }
 })
 
