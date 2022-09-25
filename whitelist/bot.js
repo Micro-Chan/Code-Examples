@@ -129,7 +129,7 @@ function parser(message,member) {
     //test
     if (myArray[0] == "test") {
         return "Bot is working!"
-    }
+    } else {  return "none"  }
 
 }
 
@@ -158,7 +158,8 @@ client.on("messageCreate", (message) => {
             .catch()
             if (check) {
                 const member =  await guild.members.fetch(message.author.id)
-                member.send(parser(message,member))
+                const tosend = parser(message,member)
+                if (tosend != "none") {  member.send(tosend)  }
             }
         }
         run()
