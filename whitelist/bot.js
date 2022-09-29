@@ -3,11 +3,13 @@ const { token } = require('./config.json');
 const { MongoClient } = require("mongodb");
 const scriptlink = "https://mindustry.me/sugon/loader.lua"
 const RandomOrg = require('random-org');
-var random = new RandomOrg({ apiKey: '2566475e-44aa-4a06-9a53-4875b95ee981' });
+const random = new RandomOrg({ apiKey: '2566475e-44aa-4a06-9a53-4875b95ee981' });
+
 
 
 const url = "mongodb+srv://root:.iosucksLOL@whitelist.14ppa.mongodb.net/Whitelist?retryWrites=true&w=majority";
 const mclient = new MongoClient(url);
+const database = mclient.db("whitelist");
 
 // Create a new client instance
 const client = new Client({ 
@@ -30,7 +32,7 @@ client.once('ready', () => {
 
 
 //Command
-function parser(message,member) {
+async function parser(message,member) {
     let text = message.content
     let tempArray = text.split(" ");
     tempArray[0] = tempArray[0].toLowerCase()
@@ -45,6 +47,7 @@ function parser(message,member) {
                 return "You are already whitelisted!"
             } else {
                 if  (myArray.length == 1) {
+                    let scriptkey = "keyhere"
                     async function run() {
                         try {
                             const collection = database.collection("whitelisted");
@@ -53,9 +56,11 @@ function parser(message,member) {
                             let keycheck = 0
                             do{
                                 tempkey = await random.generateStrings({  n: 1, length: 18, characters: "abcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*()"  })
+                                tempkey = tempkey.random.data[0]
                                 keycheck = await collection.countDocuments({key: tempkey}, { limit: 1 })
+                                scriptkey = tempkey
                             } while (keycheck == 1)
-                            const scriptkey = tempkey
+                            
 
 
                             // create a document to insert
@@ -68,16 +73,17 @@ function parser(message,member) {
                             }
                             const result = await collection.insertOne(doc);
                             console.log(`A document was inserted with the _id: ${result.insertedId}`);
-                            } finally {
-                            await mclient.close();
+                        } finally {
+                            return("Successfully whitelisted! Your script is: ```_G.key = \"" + scriptkey + "\"\nloadstring(game:HttpGet(" + scriptlink + "))```")
                         }
                     }
                     member.roles.add("1023171996097454161");
-                    run().catch(console.dir);
-                    return("Successfully whitelisted! Your script is: ```_G.key = \"" + scriptkey + "\"\nloadstring(game:HttpGet(" + scriptlink + "))```")
+                    let toreturn = ""
+                    toreturn = await run()
+                    return toreturn
                 } else {  return "Invalid syntax!"  }
             }
-        }   else {
+        } else {
             return "You are not an old buyer!"
         }
     }
@@ -98,25 +104,23 @@ function parser(message,member) {
                 .catch()
                 console.log(keyfound)
                 if (keyfound == 1) {
+                    let scriptkey = "keyhere"
                     const filter = { key: myArray[1] };
-                    const updateDoc = {
-                        $set: {
-                          used: "true"
-                        },
-                    };
                     async function run() {
                         try {
-                            coll.updateOne(filter, updateDoc);
+                            coll.deleteOne(filter);
                             const collection = database.collection("whitelisted");
                             //create a key and check if it exists
                             let tempkey = "a"
                             let keycheck = 0
                             do{
                                 tempkey = await random.generateStrings({  n: 1, length: 18, characters: "abcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*()"  })
+                                tempkey = tempkey.random.data[0]
                                 keycheck = await collection.countDocuments({key: tempkey}, { limit: 1 })
                             } while (keycheck == 1)
-                            const scriptkey = tempkey
-                            
+                            scriptkey = tempkey
+
+
                             // create a document to insert
                             const doc = {
                                 duid: String(message.author.id),
@@ -127,13 +131,16 @@ function parser(message,member) {
                             }
                             const result = await collection.insertOne(doc);
                             console.log(`A document was inserted with the _id: ${result.insertedId}`);
-                            } finally {
-                            await mclient.close();
+                        } catch(e) {
+                            console.error(e)
+                        } finally {
+                            return("Successfully whitelisted! Your script is: ```_G.key = \"" + scriptkey + "\"\nloadstring(game:HttpGet(" + scriptlink + "))```")
                         }
                     }
                     member.roles.add("1023171996097454161");
-                    run().catch(console.dir);
-                    return("Successfully whitelisted! Your script is: ```_G.key = \"" + scriptkey + "\"\nloadstring(game:HttpGet(" + scriptlink + "))```")
+                    let toreturn = ""
+                    toreturn = await run()
+                    return toreturn
                 } else {  return "Invalid key!"  }
             } else {  return "Invalid syntax!"  }
         }
@@ -144,6 +151,7 @@ function parser(message,member) {
     if (myArray[0] == "!newkey") {
         if (member.roles.cache.has("1023171996097454161")) {         //check for whitelisted role
             if  (myArray.length == 1) {
+                let scriptkey = "keyhere"
                 async function run() {
                     try {
                         const collection = database.collection("whitelisted");
@@ -152,22 +160,25 @@ function parser(message,member) {
                         let keycheck = 0
                         do{
                             tempkey = await random.generateStrings({  n: 1, length: 18, characters: "abcdefghijklmnopqrstuvwxyz1234567890!@#$%^&*()"  })
+                            tempkey = tempkey.random.data[0]
                             keycheck = await collection.countDocuments({key: tempkey}, { limit: 1 })
+                            scriptkey = tempkey
                         } while (keycheck == 1)
-                        const scriptkey = tempkey
+                        
                         const query = {  duid: message.author.id  }
                         collection.updateOne(
                             query,
                             { $set: { key: scriptkey} }
                         )
 
-                        } finally {
-                        await mclient.close();
+                    } finally {
+                        return("Successfully changed! Your script is: ```_G.key = \"" + scriptkey + "\"\nloadstring(game:HttpGet(" + scriptlink + "))```")
                     }
                 }
                 member.roles.add("1023171996097454161");
-                run().catch(console.dir);
-                return("Successfully changed! Your script is: ```_G.key = \"" + scriptkey + "\"\nloadstring(game:HttpGet(" + scriptlink + "))```")
+                let toreturn = ""
+                toreturn = await run()
+                return toreturn
             } else {  return "Invalid syntax!"  }
         } else {  return "You are not whitelisted!"  }
     }
@@ -205,8 +216,10 @@ client.on("messageCreate", (message) => {
             .catch()
             if (check) {
                 const member =  await guild.members.fetch(message.author.id)
-                const tosend = parser(message,member)
-                if (tosend != "none") {  member.send(tosend)  }
+                let tosend = await parser(message,member)
+                if (tosend != "none") {
+                    member.send(tosend)
+                }
             }
         }
         run()
