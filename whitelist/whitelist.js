@@ -39,10 +39,8 @@ const server = http.createServer((req, res) => {
                     timematch = true
                 }
                 
-                //getting id
-                let key = data.key
-                key = key.slice(0,-6);
-                key = key.substring(6);
+                //getting script key
+                const key = data.key
 
                 //size check
                 let size = Object.keys(data).length;
@@ -54,7 +52,7 @@ const server = http.createServer((req, res) => {
                 //retrieving entry, checking hwid
                 const database = client.db("whitelist");
                 const collection = database.collection("whitelisted")
-                const query = { duid: key };
+                const query = { key: key };
                 const options = {
                   projection: { hwid: 1, lastchange: 1 },
                 };
@@ -63,7 +61,7 @@ const server = http.createServer((req, res) => {
                 if (entry.hwid != sui) {
                     if ((time - Number(entry.lastchange)) > 86400) {
                         collection.updateOne(
-                            { duid: key },
+                            query,
                             { $set: { hwid: sui, lastchange: time} }
                         )
                     } else {  hwidallow = false  }
@@ -74,7 +72,7 @@ const server = http.createServer((req, res) => {
                 //returning
                 if (timematch && size == 3 && hwidallow) {
                     collection.updateOne(
-                        { duid: key },
+                        query,
                         { $push: { IPs: data.haship } }
                     )
                     result = "xaea12"
