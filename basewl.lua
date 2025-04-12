@@ -26,8 +26,8 @@ doc = ""
 local check = 0
 for i,v in pairs(response) do
     if i == "Body" then
-        if v == "hwidgay" then check = 1 end
-        if v == "xaea12" then check = 2 end
+        if v == "hwid" then check = 1 end
+        if v == "err" then check = 2 end
     end
 end
 
